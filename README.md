@@ -4,9 +4,9 @@ EMNLP 2021
 # Introduction
 This repository was used in our paper:  
   
-[**Jointly Learning Aspect-Focused and Inter-Aspect Relations with Graph Convolutional Networks for Aspect Sentiment Analysis**](https://www.aclweb.org/anthology/2020.coling-main.13/)
+**Beta Distribution Guided Aspect-aware Graph for Aspect Category Sentiment Analysis with Affective Knowledge**
 <br>
-Bin Liang, Rongdi Yin, Lin Gui<sup>\*</sup>, Jiachen Du, Ruifeng Xu<sup>\*</sup>. *Proceedings of COLING 2020*
+Bin Liang, Hang Su, Rongdi Yin, Lin Gui<sup>\*</sup>, Min Yang, Qin Zhao, Xiaoqi Yu, and Ruifeng Xu<sup>\*</sup>. *Proceedings of EMNLP 2021*
   
 Please cite our paper and kindly give a star for this repository if you use this code.
 
