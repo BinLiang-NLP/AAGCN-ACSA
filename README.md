@@ -25,7 +25,7 @@ pip install spacy
 ```
 and
 ```bash
-python -m spacy download en
+python3 -m spacy download en
 ```
 
 
