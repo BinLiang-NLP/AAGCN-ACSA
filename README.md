@@ -6,7 +6,7 @@ This repository was used in our paper:
   
 **Beta Distribution Guided Aspect-aware Graph for Aspect Category Sentiment Analysis with Affective Knowledge**
 <br>
-{Bin Liang<sup>*</sup>}, {Hang Su<sup>*</sup>}, Rongdi Yin, Lin Gui, Min Yang, Qin Zhao, Xiaoqi Yu, and Ruifeng Xu. *Proceedings of EMNLP 2021*
+Bin Liang<sup>#</sup>, Hang Su<sup>#</sup>, Rongdi Yin, Lin Gui, Min Yang, Qin Zhao, Xiaoqi Yu, and Ruifeng Xu. *Proceedings of EMNLP 2021*
   
 Please cite our paper and kindly give a star for this repository if you use this code.
 
