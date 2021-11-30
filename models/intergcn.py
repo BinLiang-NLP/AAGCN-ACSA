@@ -26,9 +26,9 @@ class GraphConvolution(nn.Module):
         else:
             return output
 
-class INTERGCN(nn.Module):
+class AAGCN(nn.Module):
     def __init__(self, embedding_matrix, opt):
-        super(INTERGCN, self).__init__()
+        super(AAGCN, self).__init__()
         self.opt = opt
         self.embed = nn.Embedding.from_pretrained(torch.tensor(embedding_matrix, dtype=torch.float))
         self.text_lstm = DynamicLSTM(opt.embed_dim, opt.hidden_dim, num_layers=1, batch_first=True, bidirectional=True)

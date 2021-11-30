@@ -26,9 +26,9 @@ class GraphConvolution(nn.Module):
         else:
             return output
 
-class INTERGCN_BERT(nn.Module):
+class AAGCN_BERT(nn.Module):
     def __init__(self, bert, opt):
-        super(INTERGCN_BERT, self).__init__()
+        super(AAGCN_BERT, self).__init__()
         self.opt = opt
         self.bert = bert
         self.gc1 = GraphConvolution(opt.bert_dim, opt.bert_dim)
