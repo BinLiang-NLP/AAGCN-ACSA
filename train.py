@@ -10,7 +10,7 @@ import torch.nn as nn
 from bucket_iterator import BucketIterator
 from sklearn import metrics
 from data_utils import ABSADatesetReader
-from models import AFGCN, INTERGCN
+from models import AAGCN
 
 class Instructor:
     def __init__(self, opt):
@@ -155,7 +155,7 @@ class Instructor:
 if __name__ == '__main__':
     # Hyper Parameters
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_name', default='intergcn', type=str)
+    parser.add_argument('--model_name', default='aagcn', type=str)
     parser.add_argument('--dataset', default='15_rest', type=str, help='14, 15_rest, 16_rest, 15_lap, 16_lap')
     parser.add_argument('--knowledge_base', default='senticnet', type=str, help='conceptnet, senticnet')
     parser.add_argument('--optimizer', default='adam', type=str)
@@ -174,12 +174,12 @@ if __name__ == '__main__':
     opt = parser.parse_args()
 
     model_classes = {
-        'afgcn': AFGCN,
-        'intergcn': INTERGCN,
+        #'afgcn': AFGCN,
+        'aagcn': AAGCN,
     }
     input_colses = {
-        'afgcn': ['text_indices', 'dependency_graph'],
-        'intergcn': ['text_indices', 'dependency_graph', 'aspect_graph'],
+        #'afgcn': ['text_indices', 'dependency_graph'],
+        'aagcn': ['text_indices', 'dependency_graph', 'aspect_graph'],
     }
 
     initializers = {
