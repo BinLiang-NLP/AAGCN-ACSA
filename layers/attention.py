@@ -8,6 +8,14 @@ import ipdb
 
 class Attention(nn.Module):
     def __init__(self, embed_dim, hidden_dim=None, out_dim=None, n_head=1, score_function='dot_product', dropout=0):
+        ''' Attention Mechanism
+        :param embed_dim:
+        :param hidden_dim:
+        :param out_dim:
+        :param n_head: num of head (Multi-Head Attention)
+        :param score_function: scaled_dot_product / mlp (concat) / bi_linear (general dot)
+        :return (?, q_len, out_dim,)
+        '''
         super(Attention, self).__init__()
         if hidden_dim is None:
             hidden_dim = embed_dim // n_head
@@ -74,6 +82,14 @@ class Attention(nn.Module):
 
 class Attention_Masked(nn.Module):
     def __init__(self, embed_dim, hidden_dim=None, out_dim=None, n_head=1, score_function='dot_product', dropout=0):
+        ''' Attention Mechanism
+        :param embed_dim:
+        :param hidden_dim:
+        :param out_dim:
+        :param n_head: num of head (Multi-Head Attention)
+        :param score_function: scaled_dot_product / mlp (concat) / bi_linear (general dot)
+        :return (?, q_len, out_dim,)
+        '''
         super(Attention_Masked, self).__init__()
         if hidden_dim is None:
             hidden_dim = embed_dim // n_head
@@ -101,6 +117,12 @@ class Attention_Masked(nn.Module):
             self.weight.data.uniform_(-stdv, stdv)
 
     def forward(self, k, q,k_step,q_step):
+        '''
+        k: context
+        q: target
+        k_len: k length, shape [batch] (one dementional vector )，tensor
+        q_len: q length, shape [batch] (one dementional vector), tensor
+        '''
         
         if len(q.shape) == 2:
             q = torch.unsqueeze(q, dim=1)
@@ -147,6 +169,7 @@ class Attention_Masked(nn.Module):
 
 
 class NoQueryAttention(Attention):
+    '''q is a parameter'''
     def __init__(self, embed_dim, hidden_dim=None, out_dim=None, n_head=1, score_function='dot_product', q_len=1, dropout=0):
         super(NoQueryAttention, self).__init__(embed_dim, hidden_dim, out_dim, n_head, score_function, dropout)
         self.q_len = q_len

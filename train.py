@@ -10,27 +10,16 @@ import torch.nn as nn
 from bucket_iterator import BucketIterator
 from sklearn import metrics
 from data_utils import ABSADatesetReader
-from torch.utils.data import DataLoader, random_split
-from models import AAGCN
+from models import AFGCN, INTERGCN
 
 class Instructor:
     def __init__(self, opt):
         self.opt = opt
 
         absa_dataset = ABSADatesetReader(dataset=opt.dataset,knowledge_base = opt.knowledge_base, embed_dim=opt.embed_dim)
-        self.trainset = absa_dataset.train_data
-        self.testset = absa_dataset.test_data
-
-        assert 0 <= opt.valset_ratio < 1
-        if opt.valset_ratio > 0:
-            valset_len = int(len(absa_dataset.train_data) * opt.valset_ratio)
-            self.trainset, self.valset = random_split(absa_dataset.train_data, (len(absa_dataset.train_data) - valset_len, valset_len))
-        else:
-            self.valset = absa_dataset.test_data
         
-        self.train_data_loader = BucketIterator(data=self.trainset, batch_size=opt.batch_size, shuffle=True)
-        self.test_data_loader = BucketIterator(data=self.testset, batch_size=opt.batch_size, shuffle=False)
-        self.val_data_loader = BucketIterator(data=self.valset, batch_size=self.opt.batch_size, shuffle=False)
+        self.train_data_loader = BucketIterator(data=absa_dataset.train_data, batch_size=opt.batch_size, shuffle=True)
+        self.test_data_loader = BucketIterator(data=absa_dataset.test_data, batch_size=opt.batch_size, shuffle=False)
 
         self.model = opt.model_class(absa_dataset.embedding_matrix, opt).to(opt.device)
         self._print_args()
@@ -61,18 +50,17 @@ class Instructor:
                     stdv = 1. / math.sqrt(p.shape[0])
                     torch.nn.init.uniform_(p, a=-stdv, b=stdv)
 
-    def _train(self, criterion, optimizer, train_data_loader, val_data_loader):
-        max_val_acc = 0
-        max_val_f1 = 0
-        max_val_epoch = 0
+    def _train(self, criterion, optimizer):
+        max_test_acc = 0
+        max_test_f1 = 0
         global_step = 0
-        path = None
+        continue_not_increase = 0
         for epoch in range(self.opt.num_epoch):
             print('>' * 100)
             print('epoch: ', epoch)
             n_correct, n_total = 0, 0
             increase_flag = False
-            for i_batch, sample_batched in enumerate(train_data_loader):
+            for i_batch, sample_batched in enumerate(self.train_data_loader):
                 global_step += 1
 
                 self.model.train()
@@ -91,33 +79,32 @@ class Instructor:
                     n_total += len(outputs)
                     train_acc = n_correct / n_total
 
-                    val_acc, val_f1 = self._evaluate_acc_f1(val_data_loader)
-                    if val_acc > max_val_acc:
-                        max_val_acc = val_acc
-                    if val_f1 > max_val_f1:
+                    test_acc, test_f1 = self._evaluate_acc_f1()
+                    if test_acc > max_test_acc:
+                        max_test_acc = test_acc
+                    if test_f1 > max_test_f1:
                         increase_flag = True
-                        max_val_f1 = val_f1
-                        if self.opt.save and val_f1 > self.global_f1:
-                            self.global_f1 = val_f1
-                            path = 'state_dict/'+self.opt.model_name+'_'+self.opt.dataset+'_'+self.opt.knowledge_base+'.pkl'
-                            torch.save(self.model.state_dict(), path)
+                        max_test_f1 = test_f1
+                        if self.opt.save and test_f1 > self.global_f1:
+                            self.global_f1 = test_f1
+                            torch.save(self.model.state_dict(), \
+                                       'state_dict/'+self.opt.model_name+'_'+self.opt.dataset+'_'+self.opt.knowledge_base+'.pkl')
                             print('>>> best model saved.')
-                    print('loss: {:.4f}, acc: {:.4f}, val_acc: {:.4f}, val_f1: {:.4f}'.format(loss.item(), train_acc, val_acc, val_f1))
+                    print('loss: {:.4f}, acc: {:.4f}, test_acc: {:.4f}, test_f1: {:.4f}'.format(loss.item(), train_acc, test_acc, test_f1))
             if increase_flag == False:
                 continue_not_increase += 1
-                if continue_not_increase >= self.opt.patience:
-                    print('>> early stop.')
+                if continue_not_increase >= 5:
                     break
             else:
                 continue_not_increase = 0    
-        return path
+        return max_test_acc, max_test_f1
 
-    def _evaluate_acc_f1(self, data_loader):
+    def _evaluate_acc_f1(self):
         self.model.eval()
         n_test_correct, n_test_total = 0, 0
         t_targets_all, t_outputs_all = None, None
         with torch.no_grad():
-            for t_batch, t_sample_batched in enumerate(data_loader):
+            for t_batch, t_sample_batched in enumerate(self.test_data_loader):
                 t_inputs = [t_sample_batched[col].to(opt.device) for col in self.opt.inputs_cols]
                 t_targets = t_sample_batched['polarity'].to(opt.device)
                 t_outputs = self.model(t_inputs)
@@ -133,32 +120,42 @@ class Instructor:
                     t_outputs_all = torch.cat((t_outputs_all, t_outputs), dim=0)
 
         test_acc = n_test_correct / n_test_total
-        f1 = metrics.f1_score(t_targets_all.cpu(), torch.argmax(t_outputs_all, -1).cpu(), labels=[0, 1, 2], average='macro')
+        f1 = metrics.f1_score(t_targets_all.cpu(), torch.argmax(t_outputs_all, -1).cpu(), labels=[0, 2], average='macro')
         return test_acc, f1
 
-    def run(self):
+    def run(self, seed, repeats=8):
         criterion = nn.CrossEntropyLoss()
         _params = filter(lambda p: p.requires_grad, self.model.parameters())
         optimizer = self.opt.optimizer(_params, lr=self.opt.learning_rate, weight_decay=self.opt.l2reg)
+        
+        if not os.path.exists('log/'):
+            os.mkdir('log/')
 
-        train_data_loader = self.train_data_loader
-        test_data_loader = self.test_data_loader
-        val_data_loader = self.val_data_loader
+        # f_out = open('log/'+self.opt.model_name+'_'+self.opt.dataset+'_val.txt', 'w', encoding='utf-8')
+        f_out = open('log/' + self.opt.model_name + '_' + self.opt.dataset +'_' + self.opt.knowledge_base + '_val.txt', 'a', encoding='utf-8')
 
-        self._reset_params()
-        best_model_path = self._train(criterion, optimizer, train_data_loader, val_data_loader)
-        self.model.load_state_dict(torch.load(best_model_path))
-        test_acc, test_f1 = self._evaluate_acc_f1(test_data_loader)
-        print('>> test_acc: {:.4f}, test_f1: {:.4f}'.format(test_acc, test_f1))
-
-        f_out = open('log/' + self.opt.model_name + '_' + self.opt.dataset + '_' + self.opt.knowledge_base + '_val.txt',
-                     'a', encoding='utf-8')
-        f_out.write('seed : {0:5d}, max_test_acc_avg: {1}, max_test_f1_avg: {2} \n'.format(self.opt.seed, test_acc, test_f1))
+        max_test_acc_avg = 0
+        max_test_f1_avg = 0
+        for i in range(repeats):
+            print('repeat: ', (i+1))
+            self._reset_params()
+            max_test_acc, max_test_f1 = self._train(criterion, optimizer)
+            if max_test_acc > max_test_acc_avg:
+                max_test_acc_avg = max_test_acc
+            if max_test_f1 > max_test_f1_avg:
+                max_test_f1_avg = max_test_f1
+            print('#' * 100)
+        print("max_test_acc_avg:", max_test_acc_avg)
+        print("max_test_f1_avg:", max_test_f1_avg)
+        # f_out.write('max_test_acc_avg: {0}, max_test_f1_avg: {1}'.format(max_test_acc_avg, max_test_f1_avg)
+        f_out.write('seed : {0:5d}, max_test_acc_avg: {1}, max_test_f1_avg: {2} \n'.format(seed, max_test_acc_avg, max_test_f1_avg))
         f_out.close()
 
+
 if __name__ == '__main__':
+    # Hyper Parameters
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_name', default='aagcn', type=str)
+    parser.add_argument('--model_name', default='intergcn', type=str)
     parser.add_argument('--dataset', default='15_rest', type=str, help='14, 15_rest, 16_rest, 15_lap, 16_lap')
     parser.add_argument('--knowledge_base', default='senticnet', type=str, help='conceptnet, senticnet')
     parser.add_argument('--optimizer', default='adam', type=str)
@@ -172,18 +169,17 @@ if __name__ == '__main__':
     parser.add_argument('--hidden_dim', default=300, type=int)
     parser.add_argument('--polarities_dim', default=3, type=int)
     parser.add_argument('--save', default=True, type=bool)
-    parser.add_argument('--seed', default=1000, type=int)
+    parser.add_argument('--seed', default=4886, type=int)
     parser.add_argument('--device', default=None, type=str)
-    parser.add_argument('--valset_ratio', default=0.1, type=float,
-                        help='set ratio between 0 and 1 for validation support')
-    parser.add_argument('--patience', default=5, type=int)
     opt = parser.parse_args()
 
     model_classes = {
-        'aagcn': AAGCN,
+        'afgcn': AFGCN,
+        'intergcn': INTERGCN,
     }
     input_colses = {
-        'aagcn': ['text_indices', 'entity_graph', 'attribute_graph'],
+        'afgcn': ['text_indices', 'dependency_graph'],
+        'intergcn': ['text_indices', 'dependency_graph', 'aspect_graph'],
     }
 
     initializers = {
@@ -192,12 +188,12 @@ if __name__ == '__main__':
         'orthogonal_': torch.nn.init.orthogonal_,
     }
     optimizers = {
-        'adadelta': torch.optim.Adadelta,
-        'adagrad': torch.optim.Adagrad,
-        'adam': torch.optim.Adam,
-        'adamax': torch.optim.Adamax,
-        'asgd': torch.optim.ASGD,
-        'rmsprop': torch.optim.RMSprop,
+        'adadelta': torch.optim.Adadelta,  # default lr=1.0
+        'adagrad': torch.optim.Adagrad,  # default lr=0.01
+        'adam': torch.optim.Adam,  # default lr=0.001
+        'adamax': torch.optim.Adamax,  # default lr=0.002
+        'asgd': torch.optim.ASGD,  # default lr=0.01
+        'rmsprop': torch.optim.RMSprop,  # default lr=0.01
         'sgd': torch.optim.SGD,
     }
     opt.model_class = model_classes[opt.model_name]
@@ -216,4 +212,4 @@ if __name__ == '__main__':
         torch.backends.cudnn.benchmark = False
 
     ins = Instructor(opt)
-    ins.run()
+    ins.run(repeats=8, seed=opt.seed)

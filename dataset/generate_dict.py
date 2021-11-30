@@ -6,12 +6,13 @@ import re
 import argparse
 
 def generate_dict(opt):
+    # generate dictionary for seed words (conceptnet)
     if os.path.exists(opt.knowledge_base + '/dict.csv'):
         print('The dictionary already exits.')
         return
     else:
-        banlist = ['Antonym', 'DistinctFrom', 'NotCapableOf', 'NotDesires', 'NotHasProperty']
-        filename = '/home/suhang/Amalgam/conceptnet/assertions.csv'
+        banlist = ['Antonym', 'DistinctFrom', 'NotCapableOf', 'NotDesires', 'NotHasProperty'] # delete invalid relation
+        filename = 'path_of_your_conceptnetcsv' #https://www.conceptnet.io/
         fa = open('conceptnet/dict.csv', 'w', encoding='utf-8', newline='')
         writer = csv.writer(fa)
         title = ['start', 'end', 'realtion', 'weight']

@@ -122,10 +122,10 @@ class ABSADatesetReader:
         lines = fin.readlines()
         fin.close()
         fin = open(fname + '.graph_entity', 'rb')
-        entity_graphs = pickle.load(fin)
+        idx2gragh = pickle.load(fin)
         fin.close()
         fin = open(fname + '.graph_attribute', 'rb')
-        attribute_graphs = pickle.load(fin)
+        idx2gragh_a = pickle.load(fin)
         fin.close()
 
         all_data = []
@@ -139,14 +139,14 @@ class ABSADatesetReader:
                 polarity = int(polarity)+1
             except:
                 print(text)
-            entity_graph = entity_graphs[graph_id]
-            attribute_graph = attribute_graphs[graph_id]
+            dependency_graph = idx2gragh[graph_id]
+            aspect_graph = idx2gragh_a[graph_id]
 
             data = {
                 'text_indices': text_indices,
                 'polarity': polarity,
-                'entity_graph': entity_graph,
-                'attribute_graph': attribute_graph,
+                'dependency_graph': dependency_graph,
+                'aspect_graph': aspect_graph,
             }
 
             all_data.append(data)

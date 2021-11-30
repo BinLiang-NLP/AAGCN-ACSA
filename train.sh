@@ -1,0 +1,1 @@
+python train.py --dataset 15_rest --knowledge_base senticnet

@@ -18,7 +18,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
 
 from data_utils_bert import build_tokenizer, build_embedding_matrix, Tokenizer4Bert, ABSADataset
-from models import AAGCN_BERT
+from models import INTERGCN_BERT, AFGCN_BERT
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -172,8 +172,8 @@ class Instructor:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_name', default='aagcn_bert', type=str)
-    parser.add_argument('--dataset', default='rest15_sen', type=str)
+    parser.add_argument('--model_name', default='bert_spc', type=str)
+    parser.add_argument('--dataset', default='laptop', type=str, help='twitter, restaurant, laptop')
     parser.add_argument('--optimizer', default='adam', type=str)
     parser.add_argument('--initializer', default='xavier_uniform_', type=str)
     parser.add_argument('--lr', default=2e-5, type=float, help='try 5e-5, 2e-5 for BERT, 1e-3 for others')
@@ -184,22 +184,23 @@ def main():
     parser.add_argument('--log_step', default=10, type=int)
     parser.add_argument('--embed_dim', default=300, type=int)
     parser.add_argument('--hidden_dim', default=300, type=int)
-    parser.add_argument('--bert_dim', default=768, type=int)
-    parser.add_argument('--pretrained_bert_name', default='bert-base-uncased', type=str)
+    parser.add_argument('--bert_dim', default=1024, type=int)
+    parser.add_argument('--pretrained_bert_name', default='bert-large-uncased', type=str)
     parser.add_argument('--max_seq_len', default=85, type=int)
     parser.add_argument('--polarities_dim', default=3, type=int)
     parser.add_argument('--hops', default=3, type=int)
     parser.add_argument('--patience', default=5, type=int)
     parser.add_argument('--device', default=None, type=str, help='e.g. cuda:0')
     parser.add_argument('--seed', default=1234, type=int, help='set seed for reproducibility')
-    parser.add_argument('--valset_ratio', default=0.1, type=float, help='set ratio between 0 and 1 for validation support')
+    parser.add_argument('--valset_ratio', default=0, type=float, help='set ratio between 0 and 1 for validation support')
     parser.add_argument('--local_context_focus', default='cdm', type=str, help='local context focus mode, cdw or cdm')
     parser.add_argument('--SRD', default=3, type=int, help='semantic-relative-distance, see the paper of LCF-BERT model')
     opt = parser.parse_args()
 
 
     model_classes = {
-        'aagcn_bert': AAGCN_BERT,
+        'intergcn_bert': INTERGCN_BERT,
+        'afgcn_bert': AFGCN_BERT,
     }
     dataset_files = {
         'rest15_sen': {
@@ -245,7 +246,8 @@ def main():
         }
     }
     input_colses = {
-        'aagcn_bert': ['concat_bert_indices', 'concat_segments_indices', 'entity_graph', 'attribute_graph'],
+        'intergcn_bert': ['concat_bert_indices', 'concat_segments_indices', 'entity_graph', 'attribute_graph'],
+        'afgcn_bert': ['concat_bert_indices', 'concat_segments_indices', 'entity_graph'],
 
     }
     initializers = {
@@ -273,18 +275,33 @@ def main():
     log_file = '{}-{}-{}.log'.format(opt.model_name, opt.dataset, strftime("%y%m%d-%H%M", localtime()))
     logger.addHandler(logging.FileHandler(log_file))
 
-    if opt.seed is not None:
-        print('\n=======================> seed:', opt.seed, '\n')
-        random.seed(opt.seed)
-        numpy.random.seed(opt.seed)
-        torch.manual_seed(opt.seed)
-        torch.cuda.manual_seed(opt.seed)
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = False
+#     for seed in range(1000):
+#         print('\n=======================> seed:', seed, '\n')
+#         random.seed(seed)
+#         numpy.random.seed(seed)
+#         torch.manual_seed(seed)
+#         torch.cuda.manual_seed(seed)
+#         torch.backends.cudnn.deterministic = True
+#         torch.backends.cudnn.benchmark = False
+#         os.environ['PYTHONHASHSEED'] = str(opt.seed)
+
+#         ins = Instructor(opt)
+#         ins.run()
+#         print('#'*30)
+
+    seed = opt.seed
+    print('\n=======================> seed:', seed, '\n')
+    random.seed(seed)
+    numpy.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
     os.environ['PYTHONHASHSEED'] = str(opt.seed)
 
     ins = Instructor(opt)
     ins.run()
+    print('#'*30)
 
 
 if __name__ == '__main__':

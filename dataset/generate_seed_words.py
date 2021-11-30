@@ -8,6 +8,7 @@ import argparse
 
 
 def generate_seed_words(opt):
+    # generate seed words list for dataset 'lap' or 'test'
     if 'lap' in opt.dataset:
         if os.path.exists(opt.knowledge_base + '/seed_words_list_entity_lap.csv') and \
            os.path.exists(opt.knowledge_base + '/seed_words_list_attribute_lap.csv'):
@@ -24,7 +25,8 @@ def generate_seed_words(opt):
             atrans = {'general': 'general', 'operation_performance': 'performance', 'design_features': 'design',
                       'usability': 'usability', 'portability': 'portability', 'price': 'price', 'quality': 'quality',
                       'miscellaneous': 'miscellany', 'connectivity': 'connectivity'}
-            depth = 5
+            # According to the dict, perform morphological transformations of entity and attribute.
+            depth = 5           # maximum number of steps
             with open('senticnet/dict.csv', 'r') as f:
                 reader = csv.reader(f)
                 sentic = list(reader)
@@ -44,7 +46,8 @@ def generate_seed_words(opt):
                       'usability': 'usability', 'portability': 'portability', 'price': 'price', 'quality': 'quality',
                       'miscellaneous': 'miscellaneous', 'connectivity': 'connectivity'}
 
-            depth = 3
+            # According to the dict, perform morphological transformations of entity and attribute.
+            depth = 3  # maximum number of steps
             with open('conceptnet/dict.csv', 'r') as f:
                 reader = csv.reader(f)
                 concept = list(reader)
@@ -66,7 +69,8 @@ def generate_seed_words(opt):
             atrans = {'quality': 'quality', 'general': 'general', 'style_options': 'style',
                       'miscellaneous': 'miscellany', 'prices': 'price'}
 
-            depth = 5
+            # According to the dict, perform morphological transformations of entity and attribute.
+            depth = 5           # maximum number of steps
             with open('senticnet/dict.csv', 'r') as f:
                 reader = csv.reader(f)
                 sentic = list(reader)
@@ -82,8 +86,8 @@ def generate_seed_words(opt):
 
             atrans = {'quality': 'quality', 'general': 'general', 'style_options': 'style',
                       'miscellaneous': 'miscellaneous', 'prices': 'prices'}
-
-            depth = 3
+            # According to the dict, perform morphological transformations of entity and attribute.
+            depth = 3  # maximum number of steps
             with open('conceptnet/dict.csv', 'r') as f:
                 reader = csv.reader(f)
                 concept = list(reader)
@@ -99,9 +103,9 @@ def process_trans_sentic(trans, depth, dict, dataset, category):
     words_each_dataset = []
     for ea, target in trans.items():
         target = [target]
-        chosen = copy.deepcopy(target)
+        chosen = copy.deepcopy(target)  # the words have been chosen once
         words_each_entity = []
-        words_each_entity.append(target)
+        words_each_entity.append(target)  # The distance between the target and itself is 0.
         for d in range(depth):
             words_each_depth = []
             for t in words_each_entity[d]:
@@ -139,9 +143,9 @@ def process_trans_concept(trans, depth, dict, dataset, category):
     words_each_dataset = []
     for ea, target in trans.items():
         target = [target]
-        chosen = copy.deepcopy(target)
+        chosen = copy.deepcopy(target)  # 被选过的词
         words_each_entity = []
-        words_each_entity.append(target)
+        words_each_entity.append(target)  # target 距本身距离为0
         for d in range(depth):
             words_each_depth = []
             for t in words_each_entity[d]:

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from models.aagcn import AAGCN
-from models.aagcn_bert import AAGCN_BERT
+from models.afgcn import AFGCN
+from models.intergcn import INTERGCN
+from models.afgcn_bert import AFGCN_BERT
+from models.intergcn_bert import INTERGCN_BERT
