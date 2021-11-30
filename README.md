@@ -30,9 +30,13 @@ python3 -m spacy download en
 
 
 ## Training
-* Train with command, optional arguments could be found in [train.py](/train.py)
+* For non-BERT condition. Please train with command, optional arguments could be found in [train.py](/train.py)
 ```bash
-python3 train.py
+./train.sh
+```
+* For BERT-based condition. Please train with command, optional arguments could be found in [train_bert.py](/train_bert.py)
+```bash
+./train_bert.sh
 ```
 
 
