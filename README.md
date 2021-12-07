@@ -1,5 +1,5 @@
 # AAGCN-ACSA
-EMNLP 2021
+The code of this repository is constantly being updated ...
 
 # Introduction
 This repository was used in our paper:  
