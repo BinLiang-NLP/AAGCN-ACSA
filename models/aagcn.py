@@ -44,39 +44,6 @@ class AAGCN(nn.Module):
         self.dfc = nn.Linear(4*opt.hidden_dim, opt.polarities_dim)
         self.text_embed_dropout = nn.Dropout(0.3)
 
-    def position_weight(self, x, aspect_double_idx, text_len, aspect_len):
-        batch_size = x.shape[0]
-        seq_len = x.shape[1]
-        aspect_double_idx = aspect_double_idx.cpu().numpy()
-        text_len = text_len.cpu().numpy()
-        aspect_len = aspect_len.cpu().numpy()
-        weight = [[] for i in range(batch_size)]
-        for i in range(batch_size):
-            context_len = text_len[i] - aspect_len[i]
-            for j in range(aspect_double_idx[i,0]):
-                weight[i].append(1-(aspect_double_idx[i,0]-j)/context_len)
-            for j in range(aspect_double_idx[i,0], aspect_double_idx[i,1]+1):
-                weight[i].append(0)
-            for j in range(aspect_double_idx[i,1]+1, text_len[i]):
-                weight[i].append(1-(j-aspect_double_idx[i,1])/context_len)
-            for j in range(text_len[i], seq_len):
-                weight[i].append(0)
-        weight = torch.tensor(weight).unsqueeze(2).to(self.opt.device)
-        return weight*x
-
-    def mask(self, x, aspect_double_idx):
-        batch_size, seq_len = x.shape[0], x.shape[1]
-        aspect_double_idx = aspect_double_idx.cpu().numpy()
-        mask = [[] for i in range(batch_size)]
-        for i in range(batch_size):
-            for j in range(aspect_double_idx[i,0]):
-                mask[i].append(0)
-            for j in range(aspect_double_idx[i,0], aspect_double_idx[i,1]+1):
-                mask[i].append(1)
-            for j in range(aspect_double_idx[i,1]+1, seq_len):
-                mask[i].append(0)
-        mask = torch.tensor(mask).unsqueeze(2).float().to(self.opt.device)
-        return mask*x
 
     def forward(self, inputs):
         text_indices, adj, d_adj = inputs
