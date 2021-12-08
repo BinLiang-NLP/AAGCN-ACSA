@@ -40,7 +40,7 @@ python3 -m spacy download en
 ```
 
 ## See also
-The process of graph generation could be found at [./dataset/generate_graph.py.py](/dataset/generate_graph.py).
+The process of graph generation could be found at [./dataset/generate_graph.py](/dataset/generate_graph.py).
 
 
 ## Citation
