@@ -2,7 +2,7 @@
 **The code of this repository is constantly being updated, please look forward to it!**
 
 # Introduction
-This repository was used in our paper:  
+This repository was used in our paper: 
   
 **Beta Distribution Guided Aspect-aware Graph for Aspect Category Sentiment Analysis with Affective Knowledge**
 <br>
@@ -39,6 +39,8 @@ python3 -m spacy download en
 ./train_bert.sh
 ```
 
+## See also
+The process of graph generation could be found at [./dataset/generate_graph.py.py](/dataset/generate_graph.py).
 
 
 ## Citation
