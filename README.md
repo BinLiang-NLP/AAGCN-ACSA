@@ -1,5 +1,7 @@
 # AAGCN-ACSA
-**The code of this repository is constantly being updated, please look forward to it!**
+**The code of this repository is constantly being updated...** 
+
+**Please look forward to it!**
 
 # Introduction
 This repository was used in our paper: 
