@@ -43,6 +43,8 @@ python3 -m spacy download en
 
 ## See also
 The process of graph generation could be found at [./dataset/generate_graph.py](/dataset/generate_graph.py).
+The source of [SenticNet](https://sentic.net/) could be found at https://sentic.net/downloads/.
+The source of [ConceptNet] (https://www.aaai.org/ocs/index.php/AAAI/AAAI17/paper/viewFile/14972/14051) could be downloaded ate https://github.com/commonsense/conceptnet5.
 
 
 ## Citation
