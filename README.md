@@ -41,7 +41,7 @@ python3 -m spacy download en
 ./train_bert.sh
 ```
 
-* Please set the parameter of **```--model```** to "**aagcn14**" or "**aagcn_bert14**" for using different model architecture if you run the REST14 dataset.
+* Please set the parameter of **```--model```** to "**aagcn14**" or "**aagcn_bert14**" for using different architecture of the proposed model if you run the REST14 dataset.
 
 ## See also
 * The process of graph generation could be found at [./dataset/generate_graph.py](/dataset/generate_graph.py).
