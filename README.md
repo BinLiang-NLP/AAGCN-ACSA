@@ -41,6 +41,8 @@ python3 -m spacy download en
 ./train_bert.sh
 ```
 
+* Please set the parameter of **```--model```** to "**aagcn14**" or "**aagcn_bert14**" for using different model architecture if you run the REST14 dataset.
+
 ## See also
 * The process of graph generation could be found at [./dataset/generate_graph.py](/dataset/generate_graph.py).
 * The source of [SenticNet](https://sentic.net/) could be found at https://sentic.net/downloads/.
