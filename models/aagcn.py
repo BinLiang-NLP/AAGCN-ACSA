@@ -47,7 +47,7 @@ class AAGCN(nn.Module):
 
     def forward(self, inputs):
         text_indices, adj, d_adj = inputs
-        text_len = torch.sum(text_indices != 0, dim=-1)
+        text_len = torch.sum(text_indices != 0, dim=-1).cpu()
         text = self.embed(text_indices)
         text = self.text_embed_dropout(text)
         text_out, (_, _) = self.text_lstm(text, text_len)
