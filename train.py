@@ -10,7 +10,7 @@ import torch.nn as nn
 from bucket_iterator import BucketIterator
 from sklearn import metrics
 from data_utils import ABSADatesetReader
-from models import AAGCN
+from models import AAGCN, AAGCN14
 
 class Instructor:
     def __init__(self, opt):
@@ -176,11 +176,13 @@ if __name__ == '__main__':
     model_classes = {
         #'afgcn': AFGCN,
         'aagcn': AAGCN,
+        'aagcn14': AAGCN14,
     }
     input_colses = {
         #'afgcn': ['text_indices', 'dependency_graph'],
         'aagcn': ['text_indices', 'dependency_graph', 'aspect_graph'],
-    }
+        'aagcn14': ['text_indices', 'dependency_graph', 'aspect_graph'],
+   }
 
     initializers = {
         'xavier_uniform_': torch.nn.init.xavier_uniform_,

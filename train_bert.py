@@ -18,7 +18,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
 
 from data_utils_bert import build_tokenizer, build_embedding_matrix, Tokenizer4Bert, ABSADataset
-from models import AAGCN_BERT
+from models import AAGCN_BERT, AAGCN_BERT14
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -198,6 +198,7 @@ def main():
 
     model_classes = {
         'aagcn_bert': AAGCN_BERT,
+        'aagcn_bert14': AAGCN_BERT14,
         #'afgcn_bert': AFGCN_BERT,
     }
     dataset_files = {
@@ -245,6 +246,7 @@ def main():
     }
     input_colses = {
         'aagcn_bert': ['concat_bert_indices', 'concat_segments_indices', 'entity_graph', 'attribute_graph'],
+        'aagcn_bert14': ['concat_bert_indices', 'concat_segments_indices', 'entity_graph', 'attribute_graph'],
         #'afgcn_bert': ['concat_bert_indices', 'concat_segments_indices', 'entity_graph'],
 
     }
