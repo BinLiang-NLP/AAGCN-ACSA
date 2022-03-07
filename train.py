@@ -87,6 +87,8 @@ class Instructor:
                         max_test_f1 = test_f1
                         if self.opt.save and test_f1 > self.global_f1:
                             self.global_f1 = test_f1
+                            if not os.path.exists('state_dict'):
+                                os.mkdir('state_dict')
                             torch.save(self.model.state_dict(), \
                                        'state_dict/'+self.opt.model_name+'_'+self.opt.dataset+'_'+self.opt.knowledge_base+'.pkl')
                             print('>>> best model saved.')
