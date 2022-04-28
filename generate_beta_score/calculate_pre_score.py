@@ -3,8 +3,8 @@
 # ------------------
 # @File Name: calculate_score.py
 # @Version: 
-# @Author: Akuchi
-# @Mail: bliang@stu.suda.edu.cn
+# @Author: BinLiang
+# @Mail: bin.liang@stu.hit.edu.cn
 # @For: 
 # @Created Time: Mon Jan 11 20:10:55 2021
 # ------------------
